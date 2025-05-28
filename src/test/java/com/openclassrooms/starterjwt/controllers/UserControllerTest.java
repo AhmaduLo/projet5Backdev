@@ -27,16 +27,22 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
+    // Mock du service utilisateur
     @Mock
     private UserService userService;
 
+    // Mock du mapper utilisateur
     @Mock
     private UserMapper userMapper;
 
+    // Contrôleur testé, avec injection des mocks
     @InjectMocks
     private UserController userController;
 
+    // Objet User simulé
     private User testUser;
+
+    // DTO correspondant au testUser
     private UserDto testUserDto;
 
     @BeforeEach
@@ -55,6 +61,7 @@ class UserControllerTest {
         testUserDto.setLastName("User");
     }
 
+    // Simule un utilisateur trouvé en base et le mapping vers un DTO
     @Test
     void findById_WhenUserExists_ShouldReturnUserDto() {
         // Arrange (Préparation)
@@ -71,6 +78,7 @@ class UserControllerTest {
         verify(userMapper).toDto(testUser);
     }
 
+    // Simule l'absence d'utilisateur
     @Test
     void findById_WhenUserDoesNotExist_ShouldReturnNotFound() {
         // Arrange
@@ -85,6 +93,7 @@ class UserControllerTest {
         verify(userMapper, never()).toDto((User) any());
     }
 
+    // Appelle avec un ID invalide (non numérique)
     @Test
     void findById_WhenInvalidIdFormat_ShouldReturnBadRequest() {
         // Act
@@ -96,15 +105,17 @@ class UserControllerTest {
         verify(userMapper, never()).toDto((User) any());
     }
 
+    // Simule un utilisateur trouvé
     @Test
     void delete_WhenUserExistsAndIsOwner_ShouldDeleteAndReturnOk() {
         // Arrange
         given(userService.findById(1L)).willReturn(testUser);
 
-        // Configuration du contexte de sécurité
+        // Simule un utilisateur connecté avec le même email
         UserDetails userDetails = mock(UserDetails.class);
         given(userDetails.getUsername()).willReturn("test@test.com");
 
+        // Configure le contexte de sécurité avec l’utilisateur connecté
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
         SecurityContext securityContext = mock(SecurityContext.class);
         given(securityContext.getAuthentication()).willReturn(authentication);
@@ -119,6 +130,7 @@ class UserControllerTest {
         verify(userService).delete(1L);
     }
 
+    // Simule l'absence d'utilisateur
     @Test
     void delete_WhenUserDoesNotExist_ShouldReturnNotFound() {
         // Arrange
@@ -133,6 +145,7 @@ class UserControllerTest {
         verify(userService, never()).delete(anyLong());
     }
 
+    // Simule un utilisateur en base
     @Test
     void delete_WhenUserExistsButNotOwner_ShouldReturnUnauthorized() {
         // Arrange
@@ -156,6 +169,7 @@ class UserControllerTest {
         verify(userService, never()).delete(anyLong());
     }
 
+    // Appelle avec un ID invalide
     @Test
     void delete_WhenInvalidIdFormat_ShouldReturnBadRequest() {
         // Act
