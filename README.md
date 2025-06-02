@@ -27,6 +27,11 @@ Jacoco (pour la couverture de test)
 
 # 🚀 Lancer le projet 
 
+Cloner le projet : 
+git clone https://github.com/AhmaduLo/projet5Backdev.git
+
+Lancer le back-end : ./mvnw spring-boot:run
+
 # 1. Prérequis
 
 Java 11
@@ -53,7 +58,7 @@ spring.datasource.password=123456
 
 Depuis la racine du projet : mvn spring-boot:run
 
-🧪 Lancer les tests:
+# 🧪 Lancer les tests:
 
 Exécuter tous les tests : mvn test
 
