@@ -5,6 +5,7 @@ import com.openclassrooms.starterjwt.payload.request.LoginRequest;
 import com.openclassrooms.starterjwt.payload.request.SignupRequest;
 import com.openclassrooms.starterjwt.payload.response.JwtResponse;
 import com.openclassrooms.starterjwt.payload.response.MessageResponse;
+import com.openclassrooms.starterjwt.repository.SessionRepository;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 import com.openclassrooms.starterjwt.security.jwt.JwtUtils;
 
@@ -53,6 +54,9 @@ public class AuthControllerIntegrationTest {
     @MockBean
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private SessionRepository sessionRepository;
+
     @MockBean
     private JwtUtils jwtUtils;
 
@@ -65,6 +69,8 @@ public class AuthControllerIntegrationTest {
 
     @BeforeEach
     public void setUp() {
+        // 1. D'abord supprimer les participations qui référencent les users
+        sessionRepository.deleteAll();
         // Supprime tous les utilisateurs avant chaque test
         userRepository.deleteAll();
     }
