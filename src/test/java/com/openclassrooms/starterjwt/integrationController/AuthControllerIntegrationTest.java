@@ -118,10 +118,7 @@ public class AuthControllerIntegrationTest {
         userRepository.save(existingUser);
 
         // Tente de s’inscrire avec le même email
-        MvcResult result = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + testEmail + "\",\"password\":\"" + testPassword + "\",\"firstName\":\"" + testFirstName + "\",\"lastName\":\"" + testLastName + "\"}"))
-                .andExpect(status().isBadRequest()) // Doit retourner un statut 400
+        MvcResult result = mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"" + testEmail + "\",\"password\":\"" + testPassword + "\",\"firstName\":\"" + testFirstName + "\",\"lastName\":\"" + testLastName + "\"}")).andExpect(status().isBadRequest()) // Doit retourner un statut 400
                 .andReturn();
 
         // Vérifie que le message d’erreur est correct
@@ -141,30 +138,19 @@ public class AuthControllerIntegrationTest {
         userRepository.save(user);
 
         // Crée un UserDetailsImpl pour le mock
-        UserDetailsImpl userDetails = UserDetailsImpl.builder()
-                .id(1L) // ou user.getId() si l'ID est généré
-                .username(testEmail)
-                .firstName(testFirstName)
-                .lastName(testLastName)
-                .password(passwordEncoder.encode(testPassword))
-                .build();
+        UserDetailsImpl userDetails = UserDetailsImpl.builder().id(1L) // ou user.getId() si l'ID est généré
+                .username(testEmail).firstName(testFirstName).lastName(testLastName).password(passwordEncoder.encode(testPassword)).build();
 
         // Simule une authentification réussie avec le bon type de principal
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, // principal de type UserDetailsImpl
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, // principal de type UserDetailsImpl
                 null, // credentials
-                userDetails.getAuthorities()
-        );
+                userDetails.getAuthorities());
 
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(jwtUtils.generateJwtToken(any())).thenReturn("mocked-jwt-token");
 
         // Prépare et envoie la requête de login
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + testEmail + "\",\"password\":\"" + testPassword + "\"}"))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"" + testEmail + "\",\"password\":\"" + testPassword + "\"}")).andExpect(status().isOk()).andReturn();
 
         // Vérifie que la réponse contient bien le token et les infos utilisateur
         String content = result.getResponse().getContentAsString();
@@ -177,14 +163,10 @@ public class AuthControllerIntegrationTest {
     @Test
     public void testAuthenticateUser_InvalidCredentials() throws Exception {
         // Simule une erreur d'authentification
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Invalid credentials"));
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Invalid credentials"));
 
         // Envoie une requête avec de mauvais identifiants
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"wrong@email.com\",\"password\":\"wrongpassword\"}"))
-                .andExpect(status().isUnauthorized()) // Doit retourner 401 Unauthorized
+        MvcResult result = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"wrong@email.com\",\"password\":\"wrongpassword\"}")).andExpect(status().isUnauthorized()) // Doit retourner 401 Unauthorized
                 .andReturn();
     }
 }

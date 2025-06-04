@@ -94,13 +94,14 @@ class AuthControllerTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.clearContext(); // Nettoyer le contexte avant le test
 
+        //simules l’authentification réussie : si une requête d’auth arrive, tu retournes l’objet mocké
         given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
         given(authentication.getPrincipal()).willReturn(userDetails);
         given(jwtUtils.generateJwtToken(authentication)).willReturn("jwtToken");
         given(userRepository.findByEmail("test@test.com")).willReturn(Optional.of(user));
 
-        // Act
+        // Act :Appel réel de la méthode testée : authenticateUser
         ResponseEntity<?> response = authController.authenticateUser(loginRequest);
 
         // Assert
