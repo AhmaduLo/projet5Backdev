@@ -26,6 +26,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -40,13 +42,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Configure automatiquement MockMvc pour simuler les requêtes HTTP
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc; // Permet d'exécuter des requêtes HTTP sans démarrer le serveur
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepository; // Repository réel, connectée à la DB H2 en mémoire
+
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -56,6 +61,7 @@ public class AuthControllerIntegrationTest {
 
     @Autowired
     private SessionRepository sessionRepository;
+
 
     @MockBean
     private JwtUtils jwtUtils;
@@ -69,10 +75,12 @@ public class AuthControllerIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        // 1. D'abord supprimer les participations qui référencent les users
-        sessionRepository.deleteAll();
         // Supprime tous les utilisateurs avant chaque test
         userRepository.deleteAll();
+
+        //supprimer les participations qui référencent les users
+        sessionRepository.deleteAll();
+
     }
 
     @AfterEach
@@ -169,4 +177,6 @@ public class AuthControllerIntegrationTest {
         MvcResult result = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"wrong@email.com\",\"password\":\"wrongpassword\"}")).andExpect(status().isUnauthorized()) // Doit retourner 401 Unauthorized
                 .andReturn();
     }
+
+
 }
